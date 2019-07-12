@@ -1,0 +1,196 @@
+Ruby code from Week 2 presentation
+
+slide 3 -----------------------------------------------------------------
+
+3.times { puts 'abc' }
+
+
+{ 'a' => 'Apple', 'b' => 34.5 }
+
+[ 'Apple', 'Banana', 74.5, true ]
+
+(0..10).each { |n| puts n }    
+(0...10).each { |n| puts n }     
+(‘A’..’E’).each { |n| puts n }
+
+slide 5  -----------------------------------------------------------------
+
+
+s = "ABC"
+s.downcase!       # s is now "abc“   strings are mutable, unlike Java 
+puts s
+s = "ABC"
+t = s.downcase    # returns new string "abc"
+puts t
+puts s # s is still "ABC"
+
+
+class MyClass 
+  def test=(x)
+    @test = x             # instance variable
+    puts " test= #{ @test } "
+  end 
+end 
+
+c = MyClass.new
+c.test = 5 
+
+slide 6  -----------------------------------------------------------------
+
+
+two = 2
+three = 3
+puts "#{two} multiplied by #{three} is #{two*three}"
+
+
+speed_limit = 5 
+"The speed limit is " + speed_limit         # does not work in Ruby
+"The speed limit is " + speed_limit.to_s
+"The speed limit is #{ speed_limit }"  
+
+slide 9  -----------------------------------------------------------------
+
+x = 12
+if x > 10
+   puts "GT 10"
+end 
+
+puts "GT 10" if x > 10
+puts "GT 10" unless x  <= 9
+
+slide 10 -----------------------------------------------------------------
+
+if x > 10 
+   puts "GT 10"
+elsif x > 0
+   puts "0-10"
+else
+   puts "NEGATIVE" 
+end
+
+slide 11 -----------------------------------------------------------------
+
+"David" == "Dav" + "id“   # true 
+
+a = 10
+b = 7 
+a <=> b 
+
+x = 6
+puts "FIVE" if x
+
+slide 12 -----------------------------------------------------------------
+
+x = [ 1, 2, 3]
+puts   x[0]   #    1 , array indexes are 0 based
+x[5] = 10     #  array is extended
+puts x        # [1,2,3,nil,nil,10]
+puts x[-1]    # 10
+x << 12       # [1,2,3,nil,nil,10,12]
+
+
+slide 13 -----------------------------------------------------------------
+
+[2, 5, 3, 8].each { |n|  puts n+1 } 
+
+
+slide 14 -----------------------------------------------------------------
+
+[2, 5, 3, 8].map do |n|
+  [n, 2*n]
+end
+
+x = ['A','B','C'].map { |c| c.downcase } 
+x.join 
+
+
+slide 15 -----------------------------------------------------------------
+
+[2, 5, 3, 8].reduce { |sum, n| sum+n }  
+
+[2, 5, 3, 8].reduce(5) { |sum, n| sum+n }  
+
+slide 16 -----------------------------------------------------------------
+
+[2, 5, 3, 8].select  { |n| n >= 3 }
+
+slide 17 -----------------------------------------------------------------
+
+['a', 'b', 'c'].join # "abc"
+['a', 'b', 'c'].join(',') # "a,b,c“
+
+
+slide 18 -----------------------------------------------------------------
+
+x = {'a' => 1, 'b' => 2 }
+x['a']       #  1
+x['c']       #  nil
+x['d'] = 4  
+puts  x       #  {"a"=>1, "b"=>2, "d"=>4} 
+
+
+slide 20 -----------------------------------------------------------------
+
+{a: 1, b: 'bob', c: true }.each do |key, value| 
+   print key, ' ', value, "\n"
+end 
+
+
+slide 21 -----------------------------------------------------------------
+
+# count words in a sentence 
+words = Hash.new(0) # return 0 default lookup value
+sentence = 'chicka chicka boom boom'
+sentence.split.each do |word|
+  words[word] += 1
+end 
+puts words 
+
+slide 22 -----------------------------------------------------------------
+
+r = { x: 5, y: 6, z: 1} .sort do
+    |a, b| a[1] <=> b[1] # compare values 
+end
+
+
+slide 23 -----------------------------------------------------------------
+
+(1..5).each do |i|
+   puts 2*i
+end
+
+
+(1..5).each {  |i|  puts 2*i }    # does same thing
+
+
+slide 25 -----------------------------------------------------------------
+
+class Person 
+  @@population = 0
+  def initialize(name, age=0) 
+    @name = name
+    @age = age
+    @@population += 1 
+  end
+  # getter and setter methods
+  attr_accessor :name, :age
+ 
+  def haveBirthday
+    @age += 1 
+    # self.age = self.age + 1
+  end 
+  def to_s
+     "#{@name} is #{@age} year#{'s'unless @age==1} old."
+  end
+  def Person.population  # static method
+    @@population
+  end 
+end 
+
+d = Person.new('david')
+t = Person.new('tom', 2)
+puts Person.population # 2
+puts d 
+puts t 
+d.haveBirthday
+p d

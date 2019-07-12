@@ -1,0 +1,245 @@
+Ruby 
+
+create file demo.rb with contents
+
+class Hello 
+  
+  def initialize name 
+    @name = name
+  end 
+  
+  def sayHello
+   "hello "+@name
+  end 
+  
+end 
+
+
+h = Hello.new "David"
+puts h.sayHello 
+------------------------------------------------------------------
+
+to run the ruby program  $ ruby demo.rb 
+
+interactive ruby   $ irb
+quit to terminate 
+
+------------------------------------------------------------------
+
+
+$ rails new first_app  # create project directories and file
+$ cd first_app
+
+------------------------------------------------------------------
+
+edit Gemfile add 1.3.6 to sqlite3
+add rspec-rails in development, test section
+
+gem 'sqlite3', '~>1.3.6'  # update for sqlite3 version bug
+
+group :development, :test do
+  gem 'rspec-rails'
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'byebug', platform: :mri
+end
+
+------------------------------------------------------------------
+
+$ bundle update  # update gems
+
+$ bundle sqlite3  # check the version of sqlite3
+
+$ rails server # start server
+Ctrl-C to stop server
+
+------------------------------------------------------------------
+
+$ rails generate model User name visits:integer
+
+$ rails db:migrate 
+
+$ rails console
+> user = User.create(name: 'david', visits: 1)
+> User.all
+> user.delete
+> quit 
+
+------------------------------------------------------------------
+
+$ rails generate controller Users signin visit goodbye
+
+------------------------------------------------------------------
+
+edit app/controllers/users_controller.rb
+
+class UsersController < ApplicationController
+
+  def signin
+    # display form to allow user to type their name
+  end 
+  
+  def visit
+    # user name is entered
+    user_name = params[:name]
+    user_name.downcase! 
+    @user = User.find_by(name: user_name)
+    @user = User.new(name: user_name, visits: 0)  if @user.nil?
+    @user.visits+=1
+    @user.save
+  end
+  
+  def goodbye
+    user_id = params[:id]
+    @user = User.find(user_id)
+  end
+end
+
+------------------------------------------------------------------
+
+edit config/routes.rb 
+
+Rails.application.routes.draw do
+  get  '/users/:id/goodbye' => 'users#goodbye', as: 'goodbye'
+  get  '/users/signin'      => 'users#signin' , as: 'signin'  # request blank signin form
+  post '/users/visit'       => 'users#visit' ,  as: 'visit'    # submit the form
+  get  '/users/:name'       => 'users#visit'                  # sign in using URL
+  root  'users#signin'         #home page
+end
+   ------------------------------------------------------------------
+   
+display and check routes 
+
+$ rails routes
+  
+  ------------------------------------------------------------------
+
+edit app/views/users/view.html.erb
+
+<h1>Hello <%= @user.name.capitalize %></h1>
+<p id="1">Thanks for visiting.</p>
+<p id="2">You have visited this site <%= pluralize(@user.visits, 'time')%>.</p>
+<%= link_to "Good bye" , goodbye_path(@user.id)  %>
+
+------------------------------------------------------------------
+
+edit app/views/users/signin.html.erb
+
+<h1>Welcome to my page.</h1>
+<p>Please enter your first name</p>
+<%= form_tag( visit_path ) do  %>
+  <%= label_tag :name %>
+  <%= text_field_tag :name %>
+  <br/>
+  <br/>
+  <%= submit_tag 'Signin' %>
+<% end %>
+
+------------------------------------------------------------------
+edit app/views/users/goodbye.html.erb
+
+<h1>Goodbye <%= @user.name.capitalize %></h1>
+<p id="1">Please visit again.</p>
+<%= link_to "Sign in" , signin_path %>
+
+------------------------------------------------------------------
+
+tests
+
+create file  spec/requests/users_spec.rb 
+
+require 'rails_helper'
+
+RSpec.describe "Users", type: :request do
+
+  describe "sign in multiple times increments number of visits" do
+    
+    it "user signs in using url with name"  do
+      get '/users/david'
+      expect(response).to have_http_status(200)
+      # expect "1 time." to be in response 
+      assert_select "h1", "Hello David"
+      assert_select "p[id='2']", /1 time\./
+      
+      # verify database record 
+      @user = User.find_by(name: 'david')
+      expect(@user.visits).to eq 1
+      
+      # sign in again
+      get '/users/david'
+      expect(response).to have_http_status(200)
+      # expect "2 times." to be in response 
+      assert_select "p[id='2']", /2 times\./
+      @user.reload 
+      expect(@user.visits).to eq 2
+    end
+  
+    it "user signs via home page" do
+      # go to home page
+      get '/'
+      expect(response).to have_http_status(200)
+      # expect a form to be returned 
+      assert_select 'form input[name="name"]'
+      # css_select returns array of all form elements.
+      #  get the action attribute of the first and only form element
+      #  uri should be '/users/visit; 
+      uri = css_select('form')[0]['action']
+      
+      # do post with name
+      post uri, params: {name: 'david'}
+      expect(response).to have_http_status(200)
+      
+      # expect "1 time." to be in response 
+      assert_select "p[id='2']", /1 time\./
+    
+    end
+  end 
+  
+  describe 'user signs in, follows links to good bye and to sign in' do
+    
+    it "sign in" do
+      # go to home page
+      get '/'
+      expect(response).to have_http_status(200)
+      # expect a form to be returned 
+      assert_select 'form input[name="name"]' 
+      
+      # do post with name
+      post visit_path, params: { name: 'david' }
+      expect(response).to have_http_status(200)
+      
+      # get Good bye link and follow it
+      atags = css_select('a')
+      expect(atags.length).to eq 1
+      expect(atags[0].text).to eq 'Good bye'
+      # do the good bye
+      get atags[0]['href']
+      expect(response).to have_http_status(200)
+      
+      # good bye page shows sign in link
+      atags = css_select('a')
+      expect(atags.length).to eq 1
+      expect(atags[0].text).to eq 'Sign in'
+      
+      
+      # follow sigin path
+      get atags[0]['href']
+      expect(response).to have_http_status(200)
+      assert_select 'form input[name=?]', 'name' 
+      
+    end
+  end
+end
+
+------------------------------------------------------------------
+run tests 
+
+need to do this command first time
+
+$ rails generate rspec:install
+
+Now to run the test, do command
+
+$ rspec spec/requests/users_spec.rb 
+
+
+------------------------------------------------------------------
