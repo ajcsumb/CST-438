@@ -17,9 +17,9 @@ class Hangman
   
   
   def gameWon?
-     @win
+    @win
   end 
-  
+
   # return 0 if letter is not in word
   # otherwise, return the number of times the letter 
   # appears in the word
@@ -29,6 +29,7 @@ class Hangman
     if @lettersGuessed.include?(letter) == false
       @lettersGuessed.push(letter)
     end
+    # Show how many times the letter appears
     letterAppears = 0
     if @word.include?(letter.upcase) || @word.include?(letter.downcase)
       @word.each_char {
@@ -37,6 +38,10 @@ class Hangman
           letterAppears += 1
         end
       }
+
+      # Check to see if the user has won
+      checkGameStatus?
+
       return letterAppears
     else
       # If the letter does not appear, deduct 1 from count and return 0
@@ -57,6 +62,10 @@ class Hangman
         @lettersGuessed.push(ch)
         # Subtract one from count
         @count -= 1
+
+        # Check to see if the user has won
+        checkGameStatus?
+
         return ch
       end
     }
@@ -105,25 +114,27 @@ class Hangman
         end
       end
     end
-    #   @word.each_char {
-    #     |ch|
-    #     if @lettersGuessed.include?(ch)
-    #       # If the letter that is word has been guessed, add it to display String
-    #       displayString << ch << " "
-    #     else
-    #       # If the letter does not exist, add a dash
-    #       displayString << "_ "
-    #     end
-    #   }
-    # end
-    
-    
-    # begin
-    # end while 
-    # @word.each_char { 
-    #   displayString << "_"
-    # }
+    # Return the displayString
     return displayString
+  end
+
+  # Private Methods
+  private
+
+  def checkGameStatus?
+    count = 0
+    # Check to see if the user has made all the correct guesses
+    @word.each_char {
+      |ch|
+      if @lettersGuessed.include?(ch)
+        count += 1
+      end
+    }
+
+    # If the amount in count matches the length of the word then we know the user won.
+    if count == @word.length
+      @win = true
+    end
   end
  
 end
