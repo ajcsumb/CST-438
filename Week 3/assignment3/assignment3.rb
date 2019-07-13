@@ -24,17 +24,19 @@ class Hangman
   # otherwise, return the number of times the letter 
   # appears in the word
   def guess(letter)
+    # Strip whitespace and downcase the letter
+    letterModified = letter.downcase.strip
     # Push the letter onto the array if doesn't already exist
     # Check to see if the letter has already been guessed
-    if @lettersGuessed.include?(letter) == false
-      @lettersGuessed.push(letter)
+    if @lettersGuessed.include?(letterModified) == false
+      @lettersGuessed.push(letterModified)
     end
     # Show how many times the letter appears
     letterAppears = 0
-    if @word.include?(letter.upcase) || @word.include?(letter.downcase)
+    if @word.include?(letterModified.upcase) || @word.include?(letterModified.downcase)
       @word.each_char {
         |ch|
-        if ch == letter.upcase || ch == letter.downcase
+        if ch == letterModified.upcase || ch == letterModified.downcase
           letterAppears += 1
         end
       }
@@ -97,7 +99,7 @@ class Hangman
       # If there have been letters guessed by the user, check to see if they match the word and construct the string
       for i in 0...length
         # Check to see if the letter has been guessed
-        if @lettersGuessed.include?(@word[i])
+        if @lettersGuessed.include?(@word[i].downcase) || @lettersGuessed.include?(@word[i].upcase)
           # If it has and this is the first position, just add the letter
           if i == 0
             displayString = @word[i]
@@ -126,7 +128,7 @@ class Hangman
     # Check to see if the user has made all the correct guesses
     @word.each_char {
       |ch|
-      if @lettersGuessed.include?(ch)
+      if @lettersGuessed.include?(ch.downcase)
         count += 1
       end
     }
